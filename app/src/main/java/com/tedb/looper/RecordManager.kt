@@ -5,6 +5,7 @@ import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.util.Log
+import android.widget.Toast
 import kotlin.concurrent.thread
 
 class RecordManager {
@@ -36,12 +37,15 @@ class RecordManager {
         if (recordThread!=null) return
         recordCallback(true)
         recordThread = RecordThread()
+        recordThread!!.callback = {
+            stopRecording()
+        }
 
         var time = 0
         var maxFrames = BUFFER_BYTES
         if (audioTrack!=null) {
-            time = audioTrack!!.playbackHeadPosition!!
-            maxFrames = audioTrack!!.bufferSizeInFrames!!*2
+            time = audioTrack!!.playbackHeadPosition
+            maxFrames = audioTrack!!.bufferSizeInFrames*2
         }
 
         recordThread!!.recording = AudioRecording(time, maxFrames)
@@ -50,7 +54,10 @@ class RecordManager {
     }
 
     fun stopRecording() {
+        if (recordThread==null) return
         recordCallback(false)
+        // remove the callback so recording attempt to save twice
+        recordThread!!.callback = null
         // set flag to tell thread to stop
         recordThread!!.isRecording=false
         // wait for last sample to finish
@@ -70,5 +77,8 @@ class RecordManager {
     fun clearRecordings() {
         Log.d("looper","clearing recordings")
         audioTrack?.stop()
+        audioTrack?.release()
+        audioTrack = null
+        currentRecording = null
     }
 }

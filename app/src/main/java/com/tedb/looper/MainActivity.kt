@@ -18,7 +18,9 @@ class MainActivity : AppCompatActivity() {
     var isRecording : Boolean = false
 
     fun updateButtonText(isRecording: Boolean) {
-        recordButton?.text = if (isRecording) getString(R.string.stop_button_text) else getString(R.string.record_button_text)
+        runOnUiThread {
+            recordButton?.text = if (isRecording) getString(R.string.stop_button_text) else getString(R.string.record_button_text)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
