@@ -3,13 +3,17 @@ package com.tedb.looper
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlin.concurrent.thread
 
 const val PERMISSION_REQUEST_CODE = 1234
+const val COUNTDOWN_PERIOD_MILLIS = 500
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,7 +56,18 @@ class MainActivity : AppCompatActivity() {
                 recordManager?.onStopRecordingButton()
             }
             else {
-                recordManager?.startRecording()
+                val toast = Toast.makeText(this,"",Toast.LENGTH_SHORT)
+                thread(start=true) {
+                    for (i in 1..4) {
+                        runOnUiThread {
+                            toast.setText(i.toString())
+                            toast.show()
+                        }
+                        Thread.sleep(COUNTDOWN_PERIOD_MILLIS.toLong())
+                    }
+                    runOnUiThread {toast.cancel()}
+                    recordManager?.startRecording()
+                }
             }
         }
 

@@ -72,7 +72,6 @@ class RecordManager {
         // set flag to tell thread to stop
         recordThread!!.isRecording=false
         // wait for last sample to finish
-        // THIS IS A BUG CANT JOIN FROM SAME SPOT BUDDY
         recordThread!!.join()
         stopRecording()
     }

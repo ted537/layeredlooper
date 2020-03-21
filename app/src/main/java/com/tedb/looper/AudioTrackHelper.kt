@@ -11,7 +11,8 @@ fun mixRecordings(currentRecording: AudioRecording?, newRecording: AudioRecordin
     mixRecording.frameCount = currentRecording.frameCount
     for (i in 0 until currentRecording.frameCount) {
         val currentSample = currentRecording.buffer[i]
-        val newIndex = (i-newRecording.offset+newRecording.frameCount)%newRecording.frameCount
+        //val newIndex = (i-newRecording.offset+newRecording.frameCount)%newRecording.frameCount
+        val newIndex = i
         val newSample = newRecording.buffer[newIndex]
         val mixSample = currentSample+newSample
         mixRecording.buffer[i] = mixSample.toShort()

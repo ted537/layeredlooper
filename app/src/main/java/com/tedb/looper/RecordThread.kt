@@ -3,7 +3,7 @@ package com.tedb.looper
 import android.media.AudioRecord
 import android.util.Log
 
-const val RECORD_SHORT_SIZE = 400
+const val RECORD_SHORT_SIZE = 40
 
 
 class RecordThread : Thread() {
