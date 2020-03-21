@@ -81,6 +81,7 @@ class RecordManager {
         recordThread!!.start()
     }
 
+    // call this when coming from UI
     fun onStopRecordingButton() {
         // if not recording do nothing
         if (recordThread==null) return
@@ -89,15 +90,20 @@ class RecordManager {
         if (currentRecording!=null) return
 
         recordCallback(false)
-        // remove the callback so recording doesn't attempt to save twice
-        recordThread!!.callback = null
-        // set flag to tell thread to stop
-        recordThread!!.isRecording=false
-        // wait for last sample to finish
-        recordThread!!.join()
+        syncRecordThread()
         stopRecording()
     }
 
+    private fun syncRecordThread() {
+        // remove the callback so recording doesn't attempt to save twice
+        recordThread?.callback = null
+        // set flag to tell thread to stop
+        recordThread?.isRecording=false
+        // wait for last sample to finish
+        recordThread?.join()
+    }
+
+    // call this when coming from thread
     private fun stopRecording() {
         // re mix the loop with the new recording
         currentRecording = mixRecordings(currentRecording,recordThread!!.recording!!)
@@ -114,9 +120,12 @@ class RecordManager {
 
     fun clearRecordings() {
         Log.d("looper","clearing recordings")
+        syncRecordThread()
+        recordThread = null
         audioTrack?.stop()
         audioTrack?.release()
         audioTrack = null
         currentRecording = null
+        recordCallback(false)
     }
 }
