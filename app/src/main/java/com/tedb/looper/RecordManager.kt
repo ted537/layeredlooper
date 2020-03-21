@@ -38,6 +38,12 @@ class RecordManager {
             Log.d("loop","ALREADY RECORDING")
             return
         }
+
+        // restart from beginning
+        audioTrack?.pause()
+        audioTrack?.playbackHeadPosition= 0
+        audioTrack?.play()
+
         recordCallback(true)
         recordThread = RecordThread()
         recordThread!!.callback = {
@@ -47,9 +53,11 @@ class RecordManager {
         var time = 0
         var maxFrames = BUFFER_BYTES
         if (audioTrack!=null) {
-            time = audioTrack!!.playbackHeadPosition
+            time = audioTrack!!.playbackHeadPosition % currentRecording!!.frameCount
             maxFrames = audioTrack!!.bufferSizeInFrames*2
         }
+
+        Log.d("loop","created new recording with offset $time and size $maxFrames")
 
         recordThread!!.recording = AudioRecording(time, maxFrames)
         recordThread!!.recorder = recorder
