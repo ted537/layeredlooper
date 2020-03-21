@@ -16,7 +16,8 @@ class RecordThread : Thread() {
         var offset=0
         // while should be recording
         // and buffer can hold more
-        while (isRecording && offset+ RECORD_SHORT_SIZE < recording!!.buffer.size) {
+        // multiplied by 2 for short to byte conversion
+        while (isRecording && (offset+ RECORD_SHORT_SIZE)*2 < recording!!.buffer.size) {
             // write shorts
             recorder!!.read(
                 recording!!.buffer,
@@ -25,8 +26,8 @@ class RecordThread : Thread() {
             )
             offset += RECORD_SHORT_SIZE
         }
-        recording!!.endTime = offset
+        recording!!.frameCount = offset
         recorder!!.stop()
-        Log.d("record","Finished recording, wrote $offset values");
+        Log.d("record","Finished recording, wrote $offset bytes");
     }
 }

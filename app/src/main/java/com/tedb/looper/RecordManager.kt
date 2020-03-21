@@ -8,10 +8,15 @@ import android.util.Log
 import kotlin.concurrent.thread
 
 class RecordManager {
+    // external connections
+    private val recordCallback : (isRecording:Boolean) -> Unit
+
+    // simple state
     private var time : Int = 0
     private var isRecording : Boolean = false
-
-    private val recordCallback : (isRecording:Boolean) -> Unit
+    // audio data
+    private var currentRecording : AudioRecording? = null
+    var audioTrack : AudioTrack? = null
 
     private val recorder : AudioRecord = AudioRecord(
         MediaRecorder.AudioSource.MIC,
@@ -23,17 +28,20 @@ class RecordManager {
             EncodingType
         )
     )
-    private var recordings : List<AudioRecording> = emptyList()
     private var recordThread : RecordThread? = null
 
     constructor(recordCallback: (isRecording:Boolean) -> Unit) {
         this.recordCallback = recordCallback
     }
 
+    fun setRecording(value:Boolean) {
+        isRecording=value
+        recordCallback(value)
+    }
+
     fun startRecording() {
         if (isRecording) return
-        isRecording = true;
-        recordCallback(true)
+        setRecording(true)
         recordThread = RecordThread()
         recordThread!!.recording = AudioRecording(time, BUFFER_BYTES)
         recordThread!!.recorder = recorder
@@ -42,13 +50,18 @@ class RecordManager {
 
     fun stopRecording() {
         recordCallback(false)
+        // set flag to tell thread to stop
         recordThread!!.isRecording=false
+        // wait for last sample to finish
         recordThread!!.join()
-        recordThread!!.recording!!.startPlayback()
+
+        recordThread!!.recording!!.createLoopingAudioTrack().play()
+
+        setRecording(false)
     }
 
     fun clearRecordings() {
         Log.d("looper","clearing recordings")
-        recordings = emptyList()
+        audioTrack?.stop()
     }
 }

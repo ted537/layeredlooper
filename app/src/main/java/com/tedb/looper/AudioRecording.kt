@@ -3,37 +3,43 @@ package com.tedb.looper
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.media.AudioTrack.*
+import android.util.Log
 
 class AudioRecording {
-    val startTime : Int
-    var endTime : Int = -1
+    var offset = 0;
+    var frameCount : Int = -1
     val buffer : ShortArray
 
-    constructor(startTime : Int, bufferSize : Int) {
-        this.startTime = startTime
+    constructor(offset : Int, bufferSize : Int) {
         buffer = ShortArray(bufferSize) {0}
+        this.offset = offset
     }
 
-    fun startPlayback() {
-        val audioTrack = AudioTrack.Builder()
-            .setAudioAttributes(AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
-                .build()
+    fun createLoopingAudioTrack() : AudioTrack {
+        val audioTrack = Builder()
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
             )
-            .setTransferMode(AudioTrack.MODE_STATIC)
-            .setAudioFormat(AudioFormat.Builder()
-                .setEncoding(EncodingType)
-                .setSampleRate(SAMPLE_RATE)
-                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                .build()
+            .setTransferMode(MODE_STATIC)
+            .setAudioFormat(
+                AudioFormat.Builder()
+                    .setEncoding(EncodingType)
+                    .setSampleRate(SAMPLE_RATE)
+                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                    .build()
             )
-            .setBufferSizeInBytes(endTime*2)
+            .setBufferSizeInBytes(frameCount*2)
             .build()
+        Log.d("loop","built audio track")
 
-        audioTrack.setLoopPoints(startTime,endTime,-1)
+        audioTrack.setLoopPoints(0,frameCount,-1)
+        Log.d("loop","set loop points")
 
-        audioTrack.write(buffer,0,endTime)
-        audioTrack.play()
-
+        audioTrack.write(buffer,0,frameCount)
+        Log.d("loop","wrote to buffer")
+        return audioTrack
     }
 }

@@ -57,4 +57,22 @@ class MainActivity : AppCompatActivity() {
             recordManager?.clearRecordings()
         }
     }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSION_REQUEST_CODE -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    // re-instantiating the record manager will create a new audio recorder
+                    recordManager = RecordManager() {
+                        updateButtonText(it)
+                        isRecording = it
+                    }
+                }
+            }
+        }
+    }
 }
