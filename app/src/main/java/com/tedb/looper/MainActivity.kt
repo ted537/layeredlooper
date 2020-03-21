@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -12,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import com.tedb.looper.audio.RecordManager
 import com.tedb.looper.audio.RecordState
 import kotlin.concurrent.thread
@@ -19,11 +21,19 @@ import kotlin.concurrent.thread
 const val PERMISSION_REQUEST_CODE = 1234
 const val COUNTDOWN_PERIOD_MILLIS = 500
 
+
+
 class MainActivity : AppCompatActivity() {
 
     private var recordManager : RecordManager? = null
     private var recordButton : Button? = null
     private var isRecording : Boolean = false
+    private var enableCountDown : Boolean = false
+
+    private fun getCountdownEnabled() : Boolean {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        return sharedPreferences.getBoolean("countdown",true)
+    }
 
     fun updateButtonText() {
         runOnUiThread {
@@ -39,9 +49,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        enableCountDown = getCountdownEnabled()
+        Log.d("loop","resumed")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        enableCountDown = getCountdownEnabled()
 
         val permission_status = ContextCompat.checkSelfPermission(
             this,
@@ -74,14 +91,16 @@ class MainActivity : AppCompatActivity() {
 
                 // run on separate thread because we need to wait
                 thread(start=true) {
-                    for (i in 1..4) {
-                        runOnUiThread {
-                            toast.setText(i.toString())
-                            toast.show()
+                    if (enableCountDown) {
+                        for (i in 1..4) {
+                            runOnUiThread {
+                                toast.setText(i.toString())
+                                toast.show()
+                            }
+                            Thread.sleep(COUNTDOWN_PERIOD_MILLIS.toLong())
                         }
-                        Thread.sleep(COUNTDOWN_PERIOD_MILLIS.toLong())
+                        runOnUiThread { toast.cancel() }
                     }
-                    runOnUiThread {toast.cancel()}
                     recordManager?.startRecording()
                 }
             }
