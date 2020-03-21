@@ -5,6 +5,7 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.media.AudioTrack.*
 import android.util.Log
+import java.util.Collections.max
 
 class AudioRecording {
     var offset = 0;
@@ -17,6 +18,7 @@ class AudioRecording {
     }
 
     fun createLoopingAudioTrack() : AudioTrack {
+        val trackFrameCount = max(listOf(frameCount,1))
         val audioTrack = Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -31,14 +33,14 @@ class AudioRecording {
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build()
             )
-            .setBufferSizeInBytes(frameCount*2)
+            .setBufferSizeInBytes(trackFrameCount*2)
             .build()
         Log.d("loop","built audio track")
 
-        audioTrack.setLoopPoints(0,frameCount,-1)
+        audioTrack.setLoopPoints(0,trackFrameCount,-1)
         Log.d("loop","set loop points")
 
-        audioTrack.write(buffer,0,frameCount)
+        audioTrack.write(buffer,0,trackFrameCount)
         Log.d("loop","wrote to buffer")
         return audioTrack
     }

@@ -11,9 +11,6 @@ class RecordManager {
     // external connections
     private val recordCallback : (isRecording:Boolean) -> Unit
 
-    // simple state
-    private var time : Int = 0
-    private var isRecording : Boolean = false
     // audio data
     private var currentRecording : AudioRecording? = null
     var audioTrack : AudioTrack? = null
@@ -34,16 +31,20 @@ class RecordManager {
         this.recordCallback = recordCallback
     }
 
-    fun setRecording(value:Boolean) {
-        isRecording=value
-        recordCallback(value)
-    }
 
     fun startRecording() {
-        if (isRecording) return
-        setRecording(true)
+        if (recordThread!=null) return
+        recordCallback(true)
         recordThread = RecordThread()
-        recordThread!!.recording = AudioRecording(time, BUFFER_BYTES)
+
+        var time = 0
+        var maxFrames = BUFFER_BYTES
+        if (audioTrack!=null) {
+            time = audioTrack!!.playbackHeadPosition!!
+            maxFrames = audioTrack!!.bufferSizeInFrames!!*2
+        }
+
+        recordThread!!.recording = AudioRecording(time, maxFrames)
         recordThread!!.recorder = recorder
         recordThread!!.start()
     }
@@ -55,9 +56,15 @@ class RecordManager {
         // wait for last sample to finish
         recordThread!!.join()
 
-        recordThread!!.recording!!.createLoopingAudioTrack().play()
+        currentRecording = mixRecordings(currentRecording,recordThread!!.recording!!)
+        audioTrack?.stop()
+        audioTrack?.release()
+        audioTrack = currentRecording!!.createLoopingAudioTrack()
+        audioTrack!!.play()
 
-        setRecording(false)
+        recordCallback(false)
+        recordThread = null
+
     }
 
     fun clearRecordings() {

@@ -5,10 +5,12 @@ import android.util.Log
 
 const val RECORD_SHORT_SIZE = 400
 
+
 class RecordThread : Thread() {
     var recording : AudioRecording? = null
     var recorder : AudioRecord? = null
     var isRecording : Boolean = false
+    var callback : (()->Unit)? = null
 
     override fun run() {
         isRecording=true
@@ -29,5 +31,6 @@ class RecordThread : Thread() {
         recording!!.frameCount = offset
         recorder!!.stop()
         Log.d("record","Finished recording, wrote $offset bytes");
+        callback?.invoke()
     }
 }
