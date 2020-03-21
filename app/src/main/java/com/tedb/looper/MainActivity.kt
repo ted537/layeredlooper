@@ -1,18 +1,19 @@
 package com.tedb.looper
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Looper
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.tedb.looper.audio.RecordManager
+import com.tedb.looper.audio.RecordState
 import kotlin.concurrent.thread
 
 const val PERMISSION_REQUEST_CODE = 1234
@@ -26,13 +27,13 @@ class MainActivity : AppCompatActivity() {
 
     fun updateButtonText() {
         runOnUiThread {
-            if (recordManager?.getRecordState()==RecordState.RECORDING_FIRST) {
+            if (recordManager?.getRecordState()== RecordState.RECORDING_FIRST) {
                 recordButton!!.setText(getString(R.string.stop_button_text))
             }
-            else if (recordManager?.getRecordState()==RecordState.RECORDING_LAYER){
+            else if (recordManager?.getRecordState()== RecordState.RECORDING_LAYER){
                 recordButton!!.setText(getString(R.string.recording_button_text))
             }
-            else if (recordManager?.getRecordState()==RecordState.NOT_RECORDING) {
+            else if (recordManager?.getRecordState()== RecordState.NOT_RECORDING) {
                 recordButton!!.setText(getString(R.string.record_button_text))
             }
         }
@@ -112,6 +113,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.mainmenu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_settings) {
+            startActivity(Intent(this,SettingsActivity::class.java))
+        }
         return true
     }
 }

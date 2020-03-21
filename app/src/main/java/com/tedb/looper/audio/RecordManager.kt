@@ -1,12 +1,11 @@
-package com.tedb.looper
+package com.tedb.looper.audio
 
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.util.Log
-import android.widget.Toast
-import kotlin.concurrent.thread
+import java.io.File
 
 enum class RecordState {
     NOT_RECORDING,
@@ -76,7 +75,8 @@ class RecordManager {
 
         Log.d("loop","created new recording with offset $time and size $maxFrames")
 
-        recordThread!!.recording = AudioRecording(time, maxFrames)
+        recordThread!!.recording =
+            AudioRecording(time, maxFrames)
         recordThread!!.recorder = recorder
         recordThread!!.start()
     }
@@ -106,7 +106,10 @@ class RecordManager {
     // call this when coming from thread
     private fun stopRecording() {
         // re mix the loop with the new recording
-        currentRecording = mixRecordings(currentRecording,recordThread!!.recording!!)
+        currentRecording = mixRecordings(
+            currentRecording,
+            recordThread!!.recording!!
+        )
         audioTrack?.stop()
         audioTrack?.release()
         audioTrack = currentRecording!!.createLoopingAudioTrack()
@@ -128,4 +131,5 @@ class RecordManager {
         currentRecording = null
         recordCallback(false)
     }
+
 }

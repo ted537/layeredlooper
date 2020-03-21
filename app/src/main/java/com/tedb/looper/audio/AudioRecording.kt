@@ -1,10 +1,12 @@
-package com.tedb.looper
+package com.tedb.looper.audio
 
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.media.AudioTrack.*
 import android.util.Log
+import com.tedb.looper.audio.EncodingType
+import com.tedb.looper.audio.SAMPLE_RATE
 import java.util.Collections.max
 
 class AudioRecording {

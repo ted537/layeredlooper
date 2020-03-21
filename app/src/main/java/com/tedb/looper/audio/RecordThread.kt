@@ -1,7 +1,6 @@
-package com.tedb.looper
+package com.tedb.looper.audio
 
 import android.media.AudioRecord
-import android.media.AudioTrack
 import android.util.Log
 
 const val RECORD_SHORT_SIZE = 40
