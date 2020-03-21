@@ -10,9 +10,10 @@ import com.tedb.looper.audio.SAMPLE_RATE
 import java.util.Collections.max
 
 class AudioRecording {
-    var offset = 0;
+    var offset : Int = 0;
     var frameCount : Int = -1
     val buffer : ShortArray
+    var weight : Int = 1
 
     constructor(offset : Int, bufferSize : Int) {
         buffer = ShortArray(bufferSize) {0}

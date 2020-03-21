@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         enableCountDown = getCountdownEnabled()
-        Log.d("loop","resumed")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,11 +104,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        val clearButton = findViewById<Button>(R.id.clear_button)
-        clearButton.setOnClickListener() {
-            recordManager?.clearRecordings()
-        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -139,6 +133,9 @@ class MainActivity : AppCompatActivity() {
         if (item.itemId == R.id.menu_settings) {
             startActivity(Intent(this,SettingsActivity::class.java))
         }
-        return true
+        if (item.itemId == R.id.menu_clear) {
+            recordManager?.clearRecordings()
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
