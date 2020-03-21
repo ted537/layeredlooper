@@ -34,7 +34,10 @@ class RecordManager {
 
 
     fun startRecording() {
-        if (recordThread!=null) return
+        if (recordThread!=null) {
+            Log.d("loop","ALREADY RECORDING")
+            return
+        }
         recordCallback(true)
         recordThread = RecordThread()
         recordThread!!.callback = {
@@ -53,16 +56,21 @@ class RecordManager {
         recordThread!!.start()
     }
 
-    fun stopRecording() {
+    fun onStopRecordingButton() {
         if (recordThread==null) return
         recordCallback(false)
-        // remove the callback so recording attempt to save twice
+        // remove the callback so recording doesn't attempt to save twice
         recordThread!!.callback = null
         // set flag to tell thread to stop
         recordThread!!.isRecording=false
         // wait for last sample to finish
+        // THIS IS A BUG CANT JOIN FROM SAME SPOT BUDDY
         recordThread!!.join()
+        stopRecording()
+    }
 
+    private fun stopRecording() {
+        // re mix the loop with the new recording
         currentRecording = mixRecordings(currentRecording,recordThread!!.recording!!)
         audioTrack?.stop()
         audioTrack?.release()
@@ -71,7 +79,7 @@ class RecordManager {
 
         recordCallback(false)
         recordThread = null
-
+        Log.d("loop","Finished saving recording")
     }
 
     fun clearRecordings() {

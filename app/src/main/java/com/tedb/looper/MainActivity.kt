@@ -19,7 +19,9 @@ class MainActivity : AppCompatActivity() {
 
     fun updateButtonText(isRecording: Boolean) {
         runOnUiThread {
-            recordButton?.text = if (isRecording) getString(R.string.stop_button_text) else getString(R.string.record_button_text)
+            recordButton?.text =
+                if (isRecording) getString(R.string.stop_button_text)
+                else getString(R.string.record_button_text)
         }
     }
 
@@ -47,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         recordButton = findViewById<Button>(R.id.record_button)
         recordButton?.setOnClickListener() {
             if (isRecording) {
-                recordManager?.stopRecording()
+                recordManager?.onStopRecordingButton()
             }
             else {
                 recordManager?.startRecording()
