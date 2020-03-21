@@ -25,9 +25,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        recordManager = RecordManager() {
-            updateButtonText(it)
-            isRecording = it
+        val permission_status = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECORD_AUDIO
+        )
+        if (permission_status!= PackageManager.PERMISSION_GRANTED) {
+            val permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
+            ActivityCompat.requestPermissions(this,
+                permissions,
+                PERMISSION_REQUEST_CODE);
+        }
+        else {
+            recordManager = RecordManager() {
+                updateButtonText(it)
+                isRecording = it
+            }
         }
 
         recordButton = findViewById<Button>(R.id.record_button)

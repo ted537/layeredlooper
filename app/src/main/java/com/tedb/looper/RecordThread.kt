@@ -13,19 +13,20 @@ class RecordThread : Thread() {
     override fun run() {
         isRecording=true
         recorder!!.startRecording()
-        var i=0
+        var offset=0
         // while should be recording
         // and buffer can hold more
-        while (isRecording && i* RECORD_SHORT_SIZE+1 < recording!!.buffer.size) {
+        while (isRecording && offset+ RECORD_SHORT_SIZE < recording!!.buffer.size) {
             // write shorts
             recorder!!.read(
                 recording!!.buffer,
-                i* RECORD_SHORT_SIZE, RECORD_SHORT_SIZE,
+                offset, RECORD_SHORT_SIZE,
                 AudioRecord.READ_BLOCKING
             )
-            ++i
+            offset += RECORD_SHORT_SIZE
         }
+        recording!!.endTime = offset
         recorder!!.stop()
-        Log.d("record","Finished recording, wrote $i times");
+        Log.d("record","Finished recording, wrote $offset values");
     }
 }
