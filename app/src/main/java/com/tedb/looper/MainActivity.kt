@@ -17,15 +17,21 @@ const val COUNTDOWN_PERIOD_MILLIS = 500
 
 class MainActivity : AppCompatActivity() {
 
-    var recordManager : RecordManager? = null
-    var recordButton : Button? = null
-    var isRecording : Boolean = false
+    private var recordManager : RecordManager? = null
+    private var recordButton : Button? = null
+    private var isRecording : Boolean = false
 
-    fun updateButtonText(isRecording: Boolean) {
+    fun updateButtonText() {
         runOnUiThread {
-            recordButton?.text =
-                if (isRecording) getString(R.string.stop_button_text)
-                else getString(R.string.record_button_text)
+            if (recordManager?.getRecordState()==RecordState.RECORDING_FIRST) {
+                recordButton!!.setText(getString(R.string.stop_button_text))
+            }
+            else if (recordManager?.getRecordState()==RecordState.RECORDING_LAYER){
+                recordButton!!.setText(getString(R.string.recording_button_text))
+            }
+            else if (recordManager?.getRecordState()==RecordState.NOT_RECORDING) {
+                recordButton!!.setText(getString(R.string.record_button_text))
+            }
         }
     }
 
@@ -45,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         }
         else {
             recordManager = RecordManager() {
-                updateButtonText(it)
+                updateButtonText()
                 isRecording = it
             }
         }
@@ -56,7 +62,13 @@ class MainActivity : AppCompatActivity() {
                 recordManager?.onStopRecordingButton()
             }
             else {
+                // stop audio before count in
+                recordManager?.stopPlayback()
+
+                // give count in
                 val toast = Toast.makeText(this,"",Toast.LENGTH_SHORT)
+
+                // run on separate thread because we need to wait
                 thread(start=true) {
                     for (i in 1..4) {
                         runOnUiThread {
@@ -87,7 +99,7 @@ class MainActivity : AppCompatActivity() {
                     // contacts-related task you need to do.
                     // re-instantiating the record manager will create a new audio recorder
                     recordManager = RecordManager() {
-                        updateButtonText(it)
+                        updateButtonText()
                         isRecording = it
                     }
                 }

@@ -8,6 +8,12 @@ import android.util.Log
 import android.widget.Toast
 import kotlin.concurrent.thread
 
+enum class RecordState {
+    NOT_RECORDING,
+    RECORDING_FIRST,
+    RECORDING_LAYER
+}
+
 class RecordManager {
     // external connections
     private val recordCallback : (isRecording:Boolean) -> Unit
@@ -32,6 +38,17 @@ class RecordManager {
         this.recordCallback = recordCallback
     }
 
+    fun stopPlayback() {
+        audioTrack?.pause()
+    }
+
+    fun getRecordState() : RecordState {
+        if (recordThread!=null) {
+            if (currentRecording==null) return RecordState.RECORDING_FIRST
+            else return RecordState.RECORDING_LAYER
+        }
+        else return RecordState.NOT_RECORDING
+    }
 
     fun startRecording() {
         if (recordThread!=null) {
@@ -65,7 +82,12 @@ class RecordManager {
     }
 
     fun onStopRecordingButton() {
+        // if not recording do nothing
         if (recordThread==null) return
+        // if have at least one layer do nothing
+        // this prevents layers from getting out of sync
+        if (currentRecording!=null) return
+
         recordCallback(false)
         // remove the callback so recording doesn't attempt to save twice
         recordThread!!.callback = null
@@ -84,8 +106,9 @@ class RecordManager {
         audioTrack = currentRecording!!.createLoopingAudioTrack()
         audioTrack!!.play()
 
-        recordCallback(false)
+
         recordThread = null
+        recordCallback(false)
         Log.d("loop","Finished saving recording")
     }
 

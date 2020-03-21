@@ -2,6 +2,7 @@
     <string name="app_name">LayeredLooper</string>
 
     <string name="record_button_text">Record</string>
+    <string name="recording_button_text">Recording...</string>
     <string name="stop_button_text">Stop</string>
     <string name="clear_button_text">Clear</string>
 </resources>
