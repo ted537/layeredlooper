@@ -1,6 +1,7 @@
 package com.tedb.looper
 
 import android.media.AudioRecord
+import android.media.AudioTrack
 import android.util.Log
 
 const val RECORD_SHORT_SIZE = 40
@@ -28,6 +29,7 @@ class RecordThread : Thread() {
             )
             offset += RECORD_SHORT_SIZE
         }
+
         recording!!.frameCount = offset
         recorder!!.stop()
         Log.d("record","Finished recording, wrote $offset bytes");
