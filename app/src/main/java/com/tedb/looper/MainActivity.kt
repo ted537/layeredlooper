@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
@@ -13,9 +14,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import com.tedb.looper.audio.RecordManager
 import com.tedb.looper.audio.RecordState
+import java.io.File
 import kotlin.concurrent.thread
 
 const val PERMISSION_REQUEST_CODE = 1234
@@ -104,6 +107,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        val file = File(Environment.getExternalStorageDirectory().path+"/layeredlooper/")
+        file.mkdir()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -132,9 +137,26 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_settings) {
             startActivity(Intent(this,SettingsActivity::class.java))
+            return true
         }
         if (item.itemId == R.id.menu_clear) {
             recordManager?.clearRecordings()
+            return true
+        }
+        if (item.itemId == R.id.menu_share) {
+            if (recordManager==null) return true
+            val file = recordManager!!.saveToFile()
+            val newpath = Environment.getExternalStorageDirectory().path+"/layeredlooper/temp.wav"
+            Log.d("record","saving in "+newpath)
+            file.renameTo(File(newpath))
+            val sendIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM,file.toUri())
+                type="audio/*"
+            }
+            val shareIntent = Intent.createChooser(sendIntent,null)
+            startActivity(shareIntent)
+            return true
         }
         return super.onOptionsItemSelected(item)
     }

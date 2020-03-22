@@ -6,6 +6,7 @@ import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.util.Log
 import java.io.File
+import java.nio.ByteOrder
 
 enum class RecordState {
     NOT_RECORDING,
@@ -130,6 +131,12 @@ class RecordManager {
         audioTrack = null
         currentRecording = null
         recordCallback(false)
+    }
+
+    fun saveToFile() : File {
+        val file = createTempFile("loop",".wav")
+        saveWavFile(file,currentRecording!!.buffer)
+        return file
     }
 
 }
