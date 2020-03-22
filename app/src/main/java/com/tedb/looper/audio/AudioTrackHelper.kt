@@ -2,10 +2,17 @@ package com.tedb.looper.audio
 
 // assumes both recordings are same length
 fun mixRecordings(currentRecording: AudioRecording?, newRecording: AudioRecording) : AudioRecording {
-    if (currentRecording==null) return  newRecording
+    if (currentRecording==null) {
+        val clipped = AudioRecording(0,newRecording.frameCount)
+        clipped.frameCount = newRecording.frameCount
+        for (i in 0 until newRecording.frameCount) {
+            clipped.buffer[i] = newRecording.buffer[i]
+        }
+        return clipped
+    }
     val mixRecording = AudioRecording(
         currentRecording.offset,
-        currentRecording.buffer.size
+        currentRecording.frameCount
     )
     mixRecording.frameCount = currentRecording.frameCount
     mixRecording.weight = currentRecording.weight + 1

@@ -7,15 +7,15 @@ import java.util.stream.Stream
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
 
 fun leWriteInt(stream: OutputStream,num:Int) {
-    stream.write(num shr 24)
-    stream.write(num shr 16)
-    stream.write(num shr 8)
-    stream.write(num)
+    stream.write(num and 0xFFFF)
+    stream.write((num ushr 8) and 0xFFFF)
+    stream.write((num ushr 16) and 0xFFFF)
+    stream.write((num ushr 24) and 0xFFFF)
 }
 
 fun leWriteShort(stream: OutputStream,num:Int) {
-    stream.write(num shr 8)
     stream.write(num)
+    stream.write(num shr 8)
 }
 
 fun saveWavFile(file: File, buffer:ShortArray) {
@@ -49,6 +49,8 @@ fun saveWavFile(file: File, buffer:ShortArray) {
     leWriteInt(stream, SAMPLE_RATE*2)
     // bytes per frame
     leWriteShort(stream,2)
+    // write bits per sample
+    leWriteShort(stream,16)
     // write data
     stream.write(
         byteArrayOfInts(0x64,0x61,0x74,0x61)

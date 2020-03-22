@@ -160,10 +160,11 @@ class MainActivity : AppCompatActivity() {
         }
         if (item.itemId == R.id.menu_share) {
             if (recordManager==null) return true
-            val file = recordManager!!.saveToFile()
             val newpath = Environment.getExternalStorageDirectory().path+"/layeredlooper/temp.wav"
+            val file = recordManager!!.saveToFile(newpath)
+
             Log.d("record","saving in "+newpath)
-            file.renameTo(File(newpath))
+            Log.d("record","file uri is "+file.toURI().toString())
             val sendIntent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_STREAM,file.toUri())

@@ -133,8 +133,8 @@ class RecordManager {
         recordCallback(false)
     }
 
-    fun saveToFile() : File {
-        val file = createTempFile("loop",".wav")
+    fun saveToFile(path:String) : File {
+        val file = File(path)
         saveWavFile(file,currentRecording!!.buffer)
         return file
     }
