@@ -3,6 +3,7 @@ package com.tedb.looper
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -38,17 +39,31 @@ class MainActivity : AppCompatActivity() {
         return sharedPreferences.getBoolean("countdown",true)
     }
 
-    fun updateButtonText() {
+    private fun getButtonColor(isRecording:Boolean) : Int {
+        if (isRecording) {
+            return getColor(R.color.colorAccent)
+        }
+        else {
+            return getColor(R.color.colorBg)
+        }
+    }
+
+    fun updateButtonStyle() {
         runOnUiThread {
-            if (recordManager?.getRecordState()== RecordState.RECORDING_FIRST) {
-                recordButton!!.setText(getString(R.string.stop_button_text))
+            if (recordManager==null) return@runOnUiThread
+            val recordState = recordManager!!.getRecordState()
+            if (recordState == RecordState.RECORDING_FIRST) {
+                recordButton!!.text = getString(R.string.stop_button_text)
             }
-            else if (recordManager?.getRecordState()== RecordState.RECORDING_LAYER){
-                recordButton!!.setText(getString(R.string.recording_button_text))
+            else if (recordState == RecordState.RECORDING_LAYER){
+                recordButton!!.text = getString(R.string.recording_button_text)
             }
-            else if (recordManager?.getRecordState()== RecordState.NOT_RECORDING) {
-                recordButton!!.setText(getString(R.string.record_button_text))
+            else if (recordState == RecordState.NOT_RECORDING) {
+                recordButton!!.text = getString(R.string.record_button_text)
             }
+
+            val color = getButtonColor(recordState!=RecordState.NOT_RECORDING)
+            recordButton!!.background.setTint(color)
         }
     }
 
@@ -74,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         }
         else {
             recordManager = RecordManager() {
-                updateButtonText()
+                updateButtonStyle()
                 isRecording = it
             }
         }
@@ -121,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                     // contacts-related task you need to do.
                     // re-instantiating the record manager will create a new audio recorder
                     recordManager = RecordManager() {
-                        updateButtonText()
+                        updateButtonStyle()
                         isRecording = it
                     }
                 }
