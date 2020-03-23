@@ -60,8 +60,8 @@ class RecordManager {
         playbackThread = currentRecording?.createLoopingAudioTrack()
         playbackThread?.start()
 
-        recordCallback(true)
         recordThread = RecordThread()
+        recordCallback(true)
         recordThread!!.callback = {
             stopRecording()
         }

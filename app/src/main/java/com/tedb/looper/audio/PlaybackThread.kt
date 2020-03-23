@@ -11,8 +11,15 @@ class PlaybackThread : Thread() {
     override fun run() {
         super.run()
         audioTrack!!.play()
-        audioTrack!!.setLoopPoints(0, buffer!!.size, -1)
-        while (loop) audioTrack!!.write(buffer!!, 0, buffer!!.size)
+        // duplicate buffer at end
+        val bigbuffer = shortArrayOf(*buffer!!,*buffer!!)
+        var offset = 0
+        while (loop) {
+            val audioBuffSize =  audioTrack!!.bufferSizeInFrames
+            audioTrack!!.write(bigbuffer, offset, audioBuffSize)
+            offset += audioBuffSize
+            offset %= buffer!!.size
+        }
     }
 
     fun release() {
