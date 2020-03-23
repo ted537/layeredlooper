@@ -8,6 +8,7 @@ import android.util.Log
 import com.tedb.looper.audio.EncodingType
 import com.tedb.looper.audio.SAMPLE_RATE
 import java.util.Collections.max
+import kotlin.concurrent.thread
 
 class AudioRecording {
     var offset : Int = 0;
@@ -20,15 +21,21 @@ class AudioRecording {
         this.offset = offset
     }
 
-    fun createLoopingAudioTrack() : AudioTrack {
+    fun createLoopingAudioTrack() : PlaybackThread {
         val trackFrameCount = max(listOf(frameCount,1))
+
+        val bufferSize = getMinBufferSize(
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_OUT_MONO,
+            EncodingType
+        )
         val audioTrack = Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
             )
-            .setTransferMode(MODE_STATIC)
+            .setTransferMode(MODE_STREAM)
             .setAudioFormat(
                 AudioFormat.Builder()
                     .setEncoding(EncodingType)
@@ -36,15 +43,14 @@ class AudioRecording {
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build()
             )
-            .setBufferSizeInBytes(trackFrameCount*2)
+            .setBufferSizeInBytes(bufferSize)
             .build()
         Log.d("loop","built audio track")
 
-        audioTrack.setLoopPoints(0,trackFrameCount,-1)
-        Log.d("loop","set loop points")
+        val playbackThread = PlaybackThread()
+        playbackThread.audioTrack = audioTrack
+        playbackThread.buffer = buffer
 
-        audioTrack.write(buffer,0,trackFrameCount)
-        Log.d("loop","wrote to buffer")
-        return audioTrack
+        return playbackThread
     }
 }

@@ -1,5 +1,7 @@
 package com.tedb.looper.audio
 
+import android.util.Log
+
 // assumes both recordings are same length
 fun mixRecordings(currentRecording: AudioRecording?, newRecording: AudioRecording) : AudioRecording {
     if (currentRecording==null) {
@@ -18,6 +20,7 @@ fun mixRecordings(currentRecording: AudioRecording?, newRecording: AudioRecordin
     mixRecording.weight = currentRecording.weight + 1
     // mixing stage
     var maxSample = 1
+    Log.d("record","current=${currentRecording.frameCount} new=${newRecording.frameCount}")
     for (i in 0 until currentRecording.frameCount) {
         val currentSample = currentRecording.buffer[i]
         //val newIndex = (i-newRecording.offset+newRecording.frameCount)%newRecording.frameCount

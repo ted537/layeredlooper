@@ -20,7 +20,7 @@ class RecordManager {
 
     // audio data
     private var currentRecording : AudioRecording? = null
-    var audioTrack : AudioTrack? = null
+    var playbackThread : PlaybackThread? = null
 
     private val recorder : AudioRecord = AudioRecord(
         MediaRecorder.AudioSource.MIC,
@@ -39,7 +39,7 @@ class RecordManager {
     }
 
     fun stopPlayback() {
-        audioTrack?.pause()
+        playbackThread?.loop=false
     }
 
     fun getRecordState() : RecordState {
@@ -56,10 +56,9 @@ class RecordManager {
             return
         }
 
-        // restart from beginning
-        audioTrack?.pause()
-        audioTrack?.playbackHeadPosition= 0
-        audioTrack?.play()
+        playbackThread?.release()
+        playbackThread = currentRecording?.createLoopingAudioTrack()
+        playbackThread?.start()
 
         recordCallback(true)
         recordThread = RecordThread()
@@ -69,9 +68,10 @@ class RecordManager {
 
         var time = 0
         var maxFrames = BUFFER_BYTES
-        if (audioTrack!=null) {
+        if (playbackThread!=null) {
+            val audioTrack = playbackThread!!.audioTrack
             time = audioTrack!!.playbackHeadPosition % currentRecording!!.frameCount
-            maxFrames = audioTrack!!.bufferSizeInFrames*2
+            maxFrames = playbackThread!!.buffer!!.size
         }
 
         Log.d("loop","created new recording with offset $time and size $maxFrames")
@@ -111,11 +111,9 @@ class RecordManager {
             currentRecording,
             recordThread!!.recording!!
         )
-        audioTrack?.stop()
-        audioTrack?.release()
-        audioTrack = currentRecording!!.createLoopingAudioTrack()
-        audioTrack!!.play()
-
+        playbackThread?.release()
+        playbackThread = currentRecording!!.createLoopingAudioTrack()
+        playbackThread!!.start()
 
         recordThread = null
         recordCallback(false)
@@ -126,9 +124,8 @@ class RecordManager {
         Log.d("looper","clearing recordings")
         syncRecordThread()
         recordThread = null
-        audioTrack?.stop()
-        audioTrack?.release()
-        audioTrack = null
+        playbackThread?.release()
+        playbackThread=null
         currentRecording = null
         recordCallback(false)
     }
